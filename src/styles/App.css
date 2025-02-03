@@ -1,0 +1,116 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background-color: #FFFFFF;
+}
+
+#bcg {
+  background-color: #FBF1E6;
+}
+
+header{
+  background-color: #2E4A62 !important;
+  border-top-right-radius: 7px;
+  border-top-left-radius: 7px;
+}
+footer {
+  background-color: #2E4A62 !important;
+  border-bottom-right-radius: 7px;
+  border-bottom-left-radius: 7px;
+}
+
+textarea {
+  resize: none !important;
+  border: none !important;
+}
+#hero{
+  background-color: #ffffff; /* Set your background color */
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+}
+.messagelist {
+  padding: 0px 5px;
+  height: 400px;
+  overflow-y: scroll;
+}
+
+.messageform {
+  border-top: 1px solid #DDD;
+}
+
+.text {
+  border-radius: 5px;
+  padding: 5px;
+  width: 300px;
+  margin-bottom: 5px;
+  word-break: break-all;
+  white-space: pre-line;
+}
+
+.secondary .text{
+  background-color: #ffffff;
+  border: 1px solid #DDDDDD;
+}
+.primary .text 
+ {
+  background-color: #A5F1B3;
+  border: 1px solid #A5F1B3;
+}
+
+aside {
+  border-left: 1px solid #DDD;
+}
+
+.emoji-wrapper button {
+  position: relative;
+}
+
+.popover {
+  opacity: 0;
+  visibility: hidden;
+  position: absolute;
+  left: 0%;
+  bottom: 18%;
+  margin-top: 10px;
+  box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.26);
+  min-width: 200px;
+  max-height: 150px;
+  overflow-y: scroll;
+}
+
+.emoji-wrapper:hover .popover {
+  z-index: 10;
+  opacity: 1;
+  visibility: visible;
+}
+
+
+#activeUsersList {
+  max-height: 400px; /* Set a fixed height for the container */
+  overflow-y: auto; /* Enable vertical scrolling */
+}
+
+.user-card {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #FFFFFF;
+  padding: 10px;
+  margin: 10px;
+  text-align: center;
+}
+
+.user-name {
+  margin: 0; /* Reset margin for the paragraph */
+}
+
+
+
+/* Example CSS to highlight the selected user */
+.user-card.highlighted {
+
+  background-color: #f0f8ff;
+  border: 1px solid #4a9de6;
+}
