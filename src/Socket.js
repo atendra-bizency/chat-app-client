@@ -18,6 +18,7 @@ socket.on('disconnect', (reason) => {
 
 socket.on('connect_error', (error) => {
     console.error('Connection error:', error);
+    console.error('Connection error:', error);
 });
 
 
