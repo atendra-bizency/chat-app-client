@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import socket from '../Socket';
 
 function LoginForm({ setLogin, setUserName }) {
   const [fullName, setFullName] = useState('');
+  const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
   const [loginMessage, setLoginMessage] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -18,12 +20,21 @@ function LoginForm({ setLogin, setUserName }) {
     }
   }, [setLogin, setUserName]);
 
+  useEffect(() => { 
+  
+    socket.on('get online user', (users) => {
+      //console.log('Online users:', users);
+      
+    })
+  }, [isLoggedIn]);
+
+  
   const handleLogin = async (e) => {
     e.preventDefault();
 
     try {
       const response = await axios.post('https://localhost:1234/api/login', {
-        fullname: fullName,
+        username: fullName,
         password,
       });
 
@@ -31,10 +42,15 @@ function LoginForm({ setLogin, setUserName }) {
         localStorage.setItem('chatUser', JSON.stringify(response.data.user));
         setIsLoggedIn(true);
         setLogin(true);
-        setUserName(response.data.user.fullName);
+        setUserName(response.data.user.full_name);
+        setUserId(response.data.user._id);
       } else {
         setLoginMessage(response.data.message);
       }
+
+      socket.emit('login', response.data.user.full_name, response.data.user._id);
+
+      
     } catch (error) {
       setLoginMessage('Login failed. Please try again.');
     }
@@ -67,7 +83,7 @@ function LoginForm({ setLogin, setUserName }) {
                 onChange={(e) => setFullName(e.target.value)}
                 className="input"
                 type="text"
-                placeholder="Full name"
+                placeholder="User name"
                 required
                 autoFocus
               />

@@ -3,12 +3,13 @@ import { useEffect, useRef } from 'react';
 import { useMessagesDispatch } from '../contexts/MessagesContext';
 import socket from '../Socket';
 
-function MessageForm({ fullName ,messages, userId}) {
+function MessageForm({ fullName , userId}) {
   const textareaRef = useRef(null);
   const emojiRef = useRef(null);
   const dispatch = useMessagesDispatch();
 
-  //console.log(messages.userId);
+  //console.log(fullName,userId);
+  
   
 
   const checkSubmit = (e) => {
@@ -23,7 +24,6 @@ function MessageForm({ fullName ,messages, userId}) {
   if (storedUser) {
        user = JSON.parse(storedUser);
   }
-  
 
   
 
@@ -35,9 +35,10 @@ function MessageForm({ fullName ,messages, userId}) {
 
     socket.emit('send message', {
       user: fullName,
-      senderId: user._id,
-      receiverId: userId,
-      text: textarea.value
+      sender: user._id,
+      receiver: userId,
+      chat: textarea.value,
+      type: 'secondary',
     });
 
 
@@ -47,11 +48,12 @@ function MessageForm({ fullName ,messages, userId}) {
       message: {
         type: 'primary',
         user: fullName,
-        senderId: user._id,
-        receiverId: userId,
-        text: textarea.value
+        sender: user._id,
+        receiver: userId,
+        chat: textarea.value,
+        time:new Date().toLocaleTimeString()
       }
-    });
+    }); 
     
     const currentDate = new Date().toISOString().split('T')[0]; // Format as YYYY-MM-DD
     const currentTime = new Date().toLocaleTimeString(); // Format as HH:MM:SS AM/PM  
@@ -78,7 +80,7 @@ function MessageForm({ fullName ,messages, userId}) {
         throw new Error('Failed to fetch messages'); // Handle HTTP errors
       }   
       const resData= await res.json();
-      console.log(resData);
+      //console.log(resData);
     } catch (error) {
       console.error('Error fetching messages:', error); 
     }

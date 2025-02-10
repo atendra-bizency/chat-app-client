@@ -76,7 +76,7 @@ function UserList({ conversations , onFetchMessage , users, onFetchUserId}) {
       }
       onFetchUserId(receiverId)
       //onFetchMessage(userId)
-      console.log(resData);
+      //console.log(resData);
     } catch (error) {
       setError(error.message); // Set error message
       console.error('Error fetching messages:', error); 

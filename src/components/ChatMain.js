@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import ChatArea from "./ChatArea";
 import ChatSidebar from "./ChatSidebar";
 
@@ -7,6 +7,17 @@ function ChatMain() {
   const [messages, setMessages] = useState([]); // State to manage messages
   const [userId, setUserId] = useState(''); // State to manage messages
   const [isLogin, setIsLogin] = useState(false);
+
+   /*useEffect(() => {
+      const storedUser = localStorage.getItem('chatUser');
+      if (storedUser) {
+        const user = JSON.parse(storedUser);   
+        setUserId(user._id);
+      }
+    }); */
+
+  //console.log(userId,'from chat main');
+  
 
   // Function to update messages
   const handleFetchMessage = (fetchedMessages) => {    
