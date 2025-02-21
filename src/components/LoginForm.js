@@ -8,6 +8,21 @@ function LoginForm({ setLogin, setUserName , fetchAllConversationOfUser, getLogi
   const [loginMessage, setLoginMessage] = useState(null);
   const [loginUserData, setLoginUserData] = useState([]);
   //console.log(fetchConversationDetails);
+
+  const [mainUrl, setMainUrl] = useState(null);
+
+  useEffect(() => {
+      // Get the query parameters from the URL
+      const queryParams = new URLSearchParams(window.location.search);
+
+      // Get the 'mainUrl' parameter
+      const url = queryParams.get('mainUrl');
+
+      if (url) {
+          console.log('Main Project URL:', url);
+          setMainUrl(url); // Store in state
+      }
+  }, []);
   
 
   const handleLogin = async (e) => {
@@ -15,7 +30,7 @@ function LoginForm({ setLogin, setUserName , fetchAllConversationOfUser, getLogi
 
     // Determine role based on URL
     const currentPath = window.location.pathname;
-    const role = currentPath.includes('/j') ? 'agent' : 'customer';
+    const role = mainUrl?.includes('/mis') ? 'agent' : 'customer';
 
     //console.log('Role:', role);
     
@@ -82,7 +97,7 @@ function LoginForm({ setLogin, setUserName , fetchAllConversationOfUser, getLogi
           </div>
 
           {/* Show password field only if role is "agent" */}
-          {window.location.pathname.includes('/j') && (
+          {mainUrl && mainUrl.includes('/mis') && (
             <div className="control">
               <input
                 value={userPassword}

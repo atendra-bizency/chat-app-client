@@ -32,7 +32,7 @@ function MessageForm({ fullName, LoggedInUser, selectedAgent, conversationId }) 
     const currentPath = window.location.pathname;
     //const role = currentPath.includes('agent') ? 'agent' : 'customer';
     //const role = LoggedInUser.role;
-    console.log(respData, 'from message form');
+    //console.log(respData, 'from message form');
 
     const loggedInUser = localStorage.getItem('chatUser');
 
@@ -84,7 +84,7 @@ function MessageForm({ fullName, LoggedInUser, selectedAgent, conversationId }) 
       } else {
 
         const resData = await res.json();
-        console.log(resData,'from resData');
+        //console.log(resData,'from resData');
         setRespData(resData)
         
 

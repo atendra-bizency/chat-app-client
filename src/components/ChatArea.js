@@ -27,23 +27,23 @@ function ChatArea({ onGetAgentDetail, selectedAgent, onGetUserConversation, fetc
     // Only update ConversationId when selectedAgent or conversation changes
 
     
-    console.log('11111X');
+    //console.log('11111X');
     if (selectedAgent) {
-      console.log('2222');
+      //console.log('2222');
       const agentConversation = conversation.find(
         conv => conv.agentDetails._id === selectedAgent.id
       );
 
       
       
-      console.log(agentConversation,'3333');
+      //console.log(agentConversation,'3333');
       if (agentConversation?.conversation_id) {
-        console.log(agentConversation.conversation_id,'444');
+        //console.log(agentConversation.conversation_id,'444');
         setConversationId(agentConversation.conversation_id);
         onGetUserConversation(agentConversation);
         setSelectedUserConversation(agentConversation)
       }else{
-        console.log(sendUserConversation,'5555');
+        //console.log(sendUserConversation,'5555');
         onGetUserConversation(sendUserConversation);
         
         setConversationId(sendUserConversation[0]?.conversation_id);
@@ -290,6 +290,10 @@ function ChatArea({ onGetAgentDetail, selectedAgent, onGetUserConversation, fetc
   }
 
 
+  //console.log(selectedAgent, LoggedInUser?.role,selectedUserConversation, 'from ChatArea');
+  
+
+
 
   return (
     <section className="column">
@@ -298,8 +302,8 @@ function ChatArea({ onGetAgentDetail, selectedAgent, onGetUserConversation, fetc
         {!isLogin ? (
           <LoginForm getLoginUserData={setLoginUserdata} setLogin={setIsLogin} setUserName={setUserName} fetchAllConversationOfUser={fetchAllConversationOfUser} />
         ) : (
-          (Array.isArray(selectedUserConversation) && selectedUserConversation.length === 0) ||
-            selectedUserConversation?.status === "open" ? (
+          (Array.isArray(selectedUserConversation) && selectedUserConversation.length === 0 &&LoggedInUser?.role !== "agent") ||
+            (selectedUserConversation?.status === "open") ? (
             <MessageForm
               conversationId={ConversationId}
               selectedAgent={selectedAgent}

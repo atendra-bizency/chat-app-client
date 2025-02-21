@@ -48,7 +48,7 @@ function ChatMain() {
         return;
       }
 
-      console.log(customerId, 'customerId');
+      //console.log(customerId, 'customerId');
 
       const response = await axios.post('https://localhost:1234/api/conversation', {
         customerId,
@@ -59,13 +59,13 @@ function ChatMain() {
       //const response = await axios.get(`https://localhost:1234/api/conversation/${role}/${customerId}`);
       //console.log('API Response:', response.data);
 
-      console.log(response);
+      //console.log(response);
 
 
       if (response.data.message) {
         const conversations = response.data.data;
 
-        console.log(conversations, 'conversations from fetchConversationDetails');
+        //console.log(conversations, 'conversations from fetchConversationDetails');
 
 
 
@@ -81,9 +81,12 @@ function ChatMain() {
   };
 
 
+  
 
-  console.log(userConversation, '=>>>>>conversationId');
-  console.log(conversation, '=>>>>>conversationId');
+
+
+  //console.log(userConversation, '=>>>>>conversationId');
+  //console.log(conversation, '=>>>>>conversationId');
 
   return (
     <main className="columns">
