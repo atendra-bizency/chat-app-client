@@ -1,16 +1,16 @@
 import React from 'react';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useMessagesDispatch } from '../contexts/MessagesContext';
 import socket from '../Socket';
 
-function MessageForm({ fullName , userId}) {
+function MessageForm({ fullName, LoggedInUser, selectedAgent, conversationId }) {
   const textareaRef = useRef(null);
   const emojiRef = useRef(null);
   const dispatch = useMessagesDispatch();
+  const [respData, setRespData] = useState([]);
 
-  //console.log(fullName,userId);
-  
-  
+  //console.log(conversationId, 'from message form');
+
 
   const checkSubmit = (e) => {
     if ((e.ctrlKey || e.metaKey) && (e.keyCode === 13 || e.keyCode === 10)) {
@@ -18,71 +18,129 @@ function MessageForm({ fullName , userId}) {
     }
   }
 
-  let user
-    const storedUser = localStorage.getItem('chatUser');
-    
-  if (storedUser) {
-       user = JSON.parse(storedUser);
-  }
+  //console.log(LoggedInUser);
 
-  
 
-  const handleSubmit = async() => {
+  const handleSubmit = async () => {
     let textarea = textareaRef.current;
     const messageText = textarea.value.trim();
 
     if (!messageText) return; // Don't send empty messages
 
-    socket.emit('send message', {
-      user: fullName,
-      sender: user._id,
-      receiver: userId,
-      chat: textarea.value,
-      type: 'secondary',
-    });
 
+    // Determine role based on URL
+    const currentPath = window.location.pathname;
+    //const role = currentPath.includes('agent') ? 'agent' : 'customer';
+    //const role = LoggedInUser.role;
+    console.log(respData, 'from message form');
 
+    const loggedInUser = localStorage.getItem('chatUser');
 
-    dispatch({
-      type: 'newmessage',
-      message: {
-        type: 'primary',
-        user: fullName,
-        sender: user._id,
-        receiver: userId,
-        chat: textarea.value,
-        time:new Date().toLocaleTimeString()
-      }
-    }); 
+    const { token, user } = JSON.parse(loggedInUser);
+
+    //console.log(user, 'from mess');
     
+    const role = user.role;
+    const userId = user._id;
+
+
     const currentDate = new Date().toISOString().split('T')[0]; // Format as YYYY-MM-DD
     const currentTime = new Date().toLocaleTimeString(); // Format as HH:MM:SS AM/PM  
 
+    // Determine API endpoint based on role
+    const apiUrl = role === 'agent'
+      ? `https://localhost:1234/api/sendAgentMessage/`
+      : `https://localhost:1234/api/sendMessage/`;
+
+    // Define request payload
+    const payload = {
+      senderId: LoggedInUser._id || userId,
+      chat: textarea.value,
+      role: role,
+      date: currentDate,
+      time: currentTime
+    };
+
+    // Add receiver only if it's an agent sending a message
+    if (role === 'agent') {
+      payload.conversationId = conversationId;
+    }
+    if (role === 'customer') {
+      payload.conversationId = conversationId;
+    }
+
 
     try {
-      
-      const res= await fetch(`https://localhost:1234/api/sendMessage/`,{
-        method:'POST',
-        headers:{
-          'Content-Type':'application/json'
+      const res = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
         },
-        body:JSON.stringify({
-          sender:user._id,
-          receiver:userId,
-          chat:textarea.value,
-          date:currentDate,
-          time:currentTime
-
-        })
+        body: JSON.stringify(payload)
       })
 
       if (!res.ok) {
         throw new Error('Failed to fetch messages'); // Handle HTTP errors
-      }   
-      const resData= await res.json();
-      //console.log(resData);
+      } else {
+
+        const resData = await res.json();
+        console.log(resData,'from resData');
+        setRespData(resData)
+        
+
+
+
+        // Construct socket event payload
+        const socketPayload = {
+          user: LoggedInUser || user,
+          senderId: LoggedInUser._id || userId,
+          receiver: selectedAgent?.id || resData.assignedAgent,
+          chat: textarea.value,
+          role: role,
+          date: currentDate,
+          timestamp: currentTime,
+          conversationId:resData.conversationId 
+        };
+
+        // Add conversationId only for agents
+        if (role === 'agent') {
+          socketPayload.conversationId = resData.conversation_id || 23; // Replace with actual conversation ID
+        }
+
+        // Emit socket event
+        socket.emit('send message', socketPayload);
+
+        // Dispatch action to update state
+        const messagePayload = {
+          type: 'primary',
+          user: resData.assignedAgentDetails,
+          senderId: LoggedInUser._id || userId,
+          receiver: selectedAgent?.id || resData.assignedAgent,
+          chat: textarea.value,
+          role: role,
+          date: currentDate,
+          timestamp: currentTime,
+          conversationId:resData.conversationId
+        };
+
+        // Add conversationId only for agents
+        if (role === 'agent') {
+          messagePayload.conversationId = resData.conversation_id || 23; // Replace with actual conversation ID
+        }
+
+      
+
+        dispatch({
+          type: 'newmessage',
+          message: messagePayload
+        });
+
+      }
+
+
     } catch (error) {
-      console.error('Error fetching messages:', error); 
+      console.error('Error fetching messages:', error);
+
     }
 
 

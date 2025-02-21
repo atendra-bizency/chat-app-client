@@ -1,64 +1,63 @@
-import React, { useReducer, createContext, useContext } from 'react';
+import React, { createContext, useContext, useReducer } from 'react';
 
-// Initial state
-const initialState = {
-  messages: [],
-};
-
-// Reducer function
-const messagesReducer = (state, action) => {
-  console.log('Reducer Action:', action); // Debugging
-  switch (action.type) {
-    case 'receive message':
-    case 'newmessage':
-      const newMessage = {
-        ...action.message,
-        messageId: Date.now(), // Add a unique ID
-      };
-      return {
-        ...state,
-        messages: [...state.messages, newMessage],
-      };
-      case 'clearMessages':  // Add this case
-            return { ...state, messages: [] }; // ✅ Reset only the messages array
-
-    default:
-      return state;
-  }
-};
-// Create context
-const MessagesContext = createContext();
+// Create contexts
+const MessageContext = createContext(null);
 const MessageDispatchContext = createContext(null);
 
-// Provider component
-const MessagesProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(messagesReducer, initialState);
+// MessagesProvider component
+export function MessagesProvider({ children }) {
+  const [messages, dispatch] = useReducer(messagesReducer, initialMessages);
 
   return (
-    <MessagesContext.Provider value={state}>
-     <MessageDispatchContext.Provider value={{ messages: state.messages, dispatch }}>
+    <MessageContext.Provider value={messages}>
+      <MessageDispatchContext.Provider value={dispatch}>
         {children}
       </MessageDispatchContext.Provider>
-    </MessagesContext.Provider>
+    </MessageContext.Provider>
   );
-};
+}
 
-// Custom hook to use the MessagesContext
-const useMessagesState = () => {
-  const context = useContext(MessagesContext);
+// Custom hook to access messages
+export function useMessages() {
+  const context = useContext(MessageContext);
   if (!context) {
-    throw new Error('useMessagesState must be used within a MessagesProvider');
+    throw new Error('useMessages must be used within a MessagesProvider');
   }
-  return context.messages;
-};
+  return context;
+}
 
-// Custom hook to use the dispatch function
-const useMessagesDispatch = () => {
+// Custom hook to access dispatch function
+export function useMessagesDispatch() {
   const context = useContext(MessageDispatchContext);
   if (!context) {
     throw new Error('useMessagesDispatch must be used within a MessagesProvider');
   }
-  return context.dispatch;
-};
+  return context;
+}
 
-export { MessagesProvider, useMessagesState, useMessagesDispatch };
+// Reducer function
+function messagesReducer(messages, action) {
+  console.log(action, 'from messagesReducer');
+  
+  switch (action.type) {
+    case 'newmessage': {
+      const hours = String(new Date().getHours()).padStart(2, '0'); // Pad hours
+      const minutes = String(new Date().getMinutes()).padStart(2, '0'); // Pad minutes
+      return [
+        ...messages,
+        {
+          ...action.message,
+          time: `${hours}:${minutes}`, // Format time as HH:mm
+        },
+      ];
+    }
+    default:
+      throw new Error('Unknown action: ' + action.type);
+  }
+}
+
+// Initial state
+const initialMessages = [];
+
+// Default export
+export default MessagesProvider;

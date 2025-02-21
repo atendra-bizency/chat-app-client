@@ -1,43 +1,94 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import ChatArea from "./ChatArea";
 import ChatSidebar from "./ChatSidebar";
+import { useEffect, useState } from 'react';
+import axios from 'axios';
+
 
 function ChatMain() {
 
-  const [messages, setMessages] = useState([]); // State to manage messages
-  const [userId, setUserId] = useState(''); // State to manage messages
-  const [isLogin, setIsLogin] = useState(false);
+  const [agentDetails, setAgentDetails] = useState([]); // State to manage messages
+  const [selectedAgent, setSelectedAgent] = useState(null);
+  const [userConversation, setUserConversation] = useState([]);
+  const [teamDetails, setTeamDetails] = useState([]);
+  const [conversation, setConversation] = useState([]);
 
-   /*useEffect(() => {
-      const storedUser = localStorage.getItem('chatUser');
-      if (storedUser) {
-        const user = JSON.parse(storedUser);   
-        setUserId(user._id);
+
+  const getAgentDetails = (agentDetails) => {
+    // Ensure agentDetails is valid before setting state
+    if (agentDetails && typeof agentDetails === 'object') {
+      setAgentDetails((prev) => [...prev, agentDetails]);
+    } else {
+      console.error('Invalid agent details:', agentDetails);
+    }
+  };
+
+  const getUserConversation = (conversation) => {
+    setUserConversation(conversation)
+  };
+
+
+
+  const fetchConversationDetails = async (customerId) => {
+    try {
+      const loggedInUser = localStorage.getItem('chatUser');
+
+      //console.log(conversation, 'from chatMAIN');
+      let agentId;
+
+      const { token, user } = JSON.parse(loggedInUser);
+      const role = user.role;
+      if (role === 'agent') {
+        agentId = user._id;
+      } else if (role === 'customer') {
+        agentId = customerId;
+        customerId = user._id;
+      } else {
+        console.error("Invalid role:", role);
+        return;
       }
-    }); */
 
-  //console.log(userId,'from chat main');
-  
+      console.log(customerId, 'customerId');
 
-  // Function to update messages
-  const handleFetchMessage = (fetchedMessages) => {    
-    setMessages(fetchedMessages);
-    //console.log(fetchedMessages);
-    
+      const response = await axios.post('https://localhost:1234/api/conversation', {
+        customerId,
+        agentId
+      });
+
+
+      //const response = await axios.get(`https://localhost:1234/api/conversation/${role}/${customerId}`);
+      //console.log('API Response:', response.data);
+
+      console.log(response);
+
+
+      if (response.data.message) {
+        const conversations = response.data.data;
+
+        console.log(conversations, 'conversations from fetchConversationDetails');
+
+
+
+        setConversation(conversations);
+        //setUserConversation(conversations)
+
+      } else {
+        console.log('No conversation found for this customer.');
+      }
+    } catch (error) {
+      console.error('Error fetching conversation details:', error);
+    }
   };
-  // Function to update messages
-  const handleFetchUserId = (fetchedUserId) => {    
-    setUserId(fetchedUserId);
-  };
-  const handleIsLogin = (isLogin) => {    
-    setIsLogin(isLogin);
-    //console.log(isLogin);
-    
-  };
+
+
+
+  console.log(userConversation, '=>>>>>conversationId');
+  console.log(conversation, '=>>>>>conversationId');
+
   return (
     <main className="columns">
-       <ChatArea messages={messages} userId={userId} onFetchIsLogin={handleIsLogin}/> {/* Pass messages to ChatArea */}
-       <ChatSidebar onFetchMessage={handleFetchMessage} onFetchUserId={handleFetchUserId} isLogin={isLogin} setIsLogin={setIsLogin}/> {/* Pass function to ChatSidebar */}
+      <ChatArea fetchConversationDetails={fetchConversationDetails}  onGetAgentDetail={getAgentDetails} onGetUserConversation={getUserConversation} selectedAgent={selectedAgent} sendUserConversation={conversation} />
+      <ChatSidebar sendAgentDetails={agentDetails} callFromUserListConversation={fetchConversationDetails} sendUserConversation={userConversation} onAgentSelect={setSelectedAgent} />
     </main>
   );
 }
