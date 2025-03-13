@@ -53,7 +53,7 @@ function Secondary({ data: { chat, timestamp, sender, type } }) {
 function Message({ data }) {
   const loggedInUser = localStorage.getItem('chatUser');
   //console.log('refresh:' + Math.random());
-  //console.log(data, 'from message');
+  console.log(data, 'from message');
   const { user } = JSON.parse(loggedInUser);
 
   //console.log(user._id, 'from message');

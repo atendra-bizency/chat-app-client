@@ -29,7 +29,7 @@ function UserList({ sendAgentDetails, onAgentSelect , sendUserConversation, call
       .filter(msg => !users.some(user => (msg.type === "primary" ? user.userId : user.senderId) ===  (msg.type === "primary" ? msg.receiver : msg.senderId)))
       .map(msg => ({
         id: msg.type === "primary" ? msg.receiver : msg.senderId,
-        fullName: msg.user?.username || 'Unknown User',
+        fullName: msg.user?.username || 'Unknown',
         team: 'Unknown Team',
         isAvailable: true,
         lastActivity: new Date().toISOString(),
@@ -51,7 +51,7 @@ function UserList({ sendAgentDetails, onAgentSelect , sendUserConversation, call
     
     if (Array.isArray(sendAgentDetails) && sendAgentDetails.length > 0) {
       // Extract relevant agent details and setUsers
-      //console.log('sendAgentDetails:', sendAgentDetails);
+      console.log('sendAgentDetails:', sendAgentDetails);
       const formattedUsers = sendAgentDetails.map(agent => ({
         id: agent._id,
         fullName: agent.username,
@@ -74,7 +74,9 @@ function UserList({ sendAgentDetails, onAgentSelect , sendUserConversation, call
 
 
    const handleSelectUser = (user) => {
-    callFromUserListConversation(user.id)
+    console.log(user, 'from handleSelectUser');
+    
+    callFromUserListConversation(user)
     
     setSelectedUserId(user.id);  // Set selected user
     onAgentSelect(user);  // Notify parent component
@@ -140,7 +142,7 @@ function UserList({ sendAgentDetails, onAgentSelect , sendUserConversation, call
   return (
     <div id="activeUsersList">
       <h2 className="has-text-centered is-size-6 is-marginless is-paddingless">
-        Online <span>({users.length})</span>
+        Online 
       </h2>
 
       {loading ? (

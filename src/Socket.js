@@ -1,5 +1,5 @@
 import SocketIO from 'socket.io-client';
-const SOCKET_URL = 'https://192.168.1.8:1234/';
+const SOCKET_URL = 'https://192.168.1.3:1234/';
 
 let socket = SocketIO(SOCKET_URL, {
     transports: ['websocket'],
@@ -18,7 +18,7 @@ socket.on('disconnect', (reason) => {
 
 socket.on('connect_error', (error) => {
     console.error('Connection error:', error);
-    console.error('Connection error:', error);
+    //console.error('Connection error:', error);
 });
 
 

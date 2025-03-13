@@ -19,7 +19,7 @@ function LoginForm({ setLogin, setUserName , fetchAllConversationOfUser, getLogi
       const url = queryParams.get('mainUrl');
 
       if (url) {
-          console.log('Main Project URL:', url);
+          //console.log('Main Project URL:', url);
           setMainUrl(url); // Store in state
       }
   }, []);
@@ -31,6 +31,7 @@ function LoginForm({ setLogin, setUserName , fetchAllConversationOfUser, getLogi
     // Determine role based on URL
     const currentPath = window.location.pathname;
     const role = mainUrl?.includes('/mis') ? 'agent' : 'customer';
+    //const role = currentPath?.includes('/') ? 'agent' : 'customer';
 
     //console.log('Role:', role);
     
@@ -54,6 +55,8 @@ function LoginForm({ setLogin, setUserName , fetchAllConversationOfUser, getLogi
 
     try {
       const response = await axios.post('https://localhost:1234/api/login', loginData);
+      console.log(response.data);
+      
 
       if (response.data.success) {
         localStorage.setItem('chatUser', JSON.stringify(response.data));
@@ -61,7 +64,7 @@ function LoginForm({ setLogin, setUserName , fetchAllConversationOfUser, getLogi
         setUserName(fullName);
         setLoginUserData(response.data)
         getLoginUserData(response.data)
-        socket.emit('login', fullName, role, response.data.user._id);
+        socket.emit('login', fullName, role, response.data.user.userId, response.data.user._id);
         fetchAllConversationOfUser(response.data.user._id)
       } else {
         setLoginMessage(response.data.message);
@@ -91,12 +94,12 @@ function LoginForm({ setLogin, setUserName , fetchAllConversationOfUser, getLogi
               type="text"
               placeholder="Full name"
               required
-              pattern="([\w]+[ ]+[\w])\w+"
               autoFocus
             />
           </div>
 
           {/* Show password field only if role is "agent" */}
+          {/* {window.location.pathname.includes('/') && ( */}
           {mainUrl && mainUrl.includes('/mis') && (
             <div className="control">
               <input

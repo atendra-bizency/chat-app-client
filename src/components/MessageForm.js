@@ -36,6 +36,9 @@ function MessageForm({ fullName, LoggedInUser, selectedAgent, conversationId }) 
 
     const loggedInUser = localStorage.getItem('chatUser');
 
+    console.log(loggedInUser, 'from mess');
+    
+
     const { token, user } = JSON.parse(loggedInUser);
 
     //console.log(user, 'from mess');
@@ -54,7 +57,7 @@ function MessageForm({ fullName, LoggedInUser, selectedAgent, conversationId }) 
 
     // Define request payload
     const payload = {
-      senderId: LoggedInUser._id || userId,
+      senderId:  userId,
       chat: textarea.value,
       role: role,
       date: currentDate,
@@ -84,7 +87,8 @@ function MessageForm({ fullName, LoggedInUser, selectedAgent, conversationId }) 
       } else {
 
         const resData = await res.json();
-        //console.log(resData,'from resData');
+        console.log(resData,'from resData');
+        console.log(selectedAgent,'from selectedAgent');
         setRespData(resData)
         
 
@@ -92,9 +96,9 @@ function MessageForm({ fullName, LoggedInUser, selectedAgent, conversationId }) 
 
         // Construct socket event payload
         const socketPayload = {
-          user: LoggedInUser || user,
-          senderId: LoggedInUser._id || userId,
-          receiver: selectedAgent?.id || resData.assignedAgent,
+          user: user,
+          senderId:  userId,
+          receiver: selectedAgent?._id || resData.assignedAgent,
           chat: textarea.value,
           role: role,
           date: currentDate,
@@ -102,10 +106,13 @@ function MessageForm({ fullName, LoggedInUser, selectedAgent, conversationId }) 
           conversationId:resData.conversationId 
         };
 
+        
+        
         // Add conversationId only for agents
         if (role === 'agent') {
-          socketPayload.conversationId = resData.conversation_id || 23; // Replace with actual conversation ID
+          socketPayload.conversationId = resData.conversationId || 23; // Replace with actual conversation ID
         }
+        console.log(socketPayload, 'from socketPayload');
 
         // Emit socket event
         socket.emit('send message', socketPayload);
@@ -114,8 +121,8 @@ function MessageForm({ fullName, LoggedInUser, selectedAgent, conversationId }) 
         const messagePayload = {
           type: 'primary',
           user: resData.assignedAgentDetails,
-          senderId: LoggedInUser._id || userId,
-          receiver: selectedAgent?.id || resData.assignedAgent,
+          senderId:  userId,
+          receiver: selectedAgent?._id || resData.assignedAgent,
           chat: textarea.value,
           role: role,
           date: currentDate,

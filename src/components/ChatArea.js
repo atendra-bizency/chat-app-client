@@ -16,6 +16,12 @@ function ChatArea({ onGetAgentDetail, selectedAgent, onGetUserConversation, fetc
   const [ConversationId, setConversationId] = useState('');
   const [selectedUserConversation, setSelectedUserConversation] = useState([]);
 
+  const [loginMessage, setLoginMessage] = useState(null);
+  const [fullName, setFullName] = useState('');
+  const [role, setRole] = useState('');
+  
+  
+
   const messages = useMessages();
   const dispatch = useMessagesDispatch();
 
@@ -56,11 +62,16 @@ function ChatArea({ onGetAgentDetail, selectedAgent, onGetUserConversation, fetc
     const loggedInUser = localStorage.getItem('chatUser');
     if (loggedInUser) {
       const { token, user } = JSON.parse(loggedInUser);
+      console.log(user);
+      
       socket.emit('restore session', token);
       setIsLogin(true);
       setUserName(user.username);
-      setLoggedInUser(user);
-      fetchAllConversationOfUser(user._id); // Fetch conversation for the logged-in user
+      setLoggedInUser(user);    
+
+      fetchAllConversationOfUser(user._id);
+      
+     
     }
   }, []);
 
@@ -139,7 +150,7 @@ function ChatArea({ onGetAgentDetail, selectedAgent, onGetUserConversation, fetc
     }
 
     function onNewMessage(message) {
-      //console.log(message);
+      console.log(message);
       //console.log(selectedAgent);
 
 
@@ -172,20 +183,20 @@ function ChatArea({ onGetAgentDetail, selectedAgent, onGetUserConversation, fetc
   // Combine messages from API and real-time context
   const getCombinedMessages = () => {
 
-    //console.log('check enter or not');
-    //console.log(conversation, 'conversation');
+    console.log('check enter or not');
+    console.log(conversation, 'conversation');
     const isConversationAvailableOrNot = conversation.find(
       conv => conv.conversation_id === messages.conversationId
     );
 
 
-    //console.log(messages);
+    console.log(messages);
      // If no conversation exists, return only real-time messages
   if (!isConversationAvailableOrNot && !messages) {
     console.log('New conversation detected. Showing real-time messages only.');
     return messages.filter(msg => 
-      msg.receiver === selectedAgent?.id || 
-      msg.senderId === selectedAgent?.id
+      msg.receiver === selectedAgent?.userId || 
+      msg.senderId === selectedAgent?.userId
     );
   }
 
@@ -194,7 +205,7 @@ function ChatArea({ onGetAgentDetail, selectedAgent, onGetUserConversation, fetc
     
     if (!selectedAgent) return [];
 
-    //console.log(selectedAgent, 'selectedAgent');
+    console.log(selectedAgent, 'selectedAgent');
 
     // Find conversation for selected agent
     const agentConversation = conversation.find(
@@ -206,7 +217,7 @@ function ChatArea({ onGetAgentDetail, selectedAgent, onGetUserConversation, fetc
       return messages
       
     }
-    //console.log(agentConversation, 'agentConversation');
+    console.log(agentConversation, 'agentConversation');
 
     // Get messages from both sources
     const apiMessages = agentConversation?.messages || [];
@@ -228,18 +239,18 @@ function ChatArea({ onGetAgentDetail, selectedAgent, onGetUserConversation, fetc
         type: 'information',
       };
 
-      //console.log(closedMessage, 'from closedMessage');
+      console.log(closedMessage, 'from closedMessage');
       
 
       apiMessages.push(closedMessage);  // Append the closed message ONLY if it's not already there
     }
 
-    //console.log(apiMessages, 'apiMessages');
+    console.log(apiMessages, 'apiMessages');
 
     const realTimeMessages = messages.filter(
       (msg) => {
 
-        //console.log(msg);
+        console.log(msg);
         if (selectedAgent) {
 
           return msg.receiver === selectedAgent.id || msg.senderId === selectedAgent.id;
@@ -290,6 +301,70 @@ function ChatArea({ onGetAgentDetail, selectedAgent, onGetUserConversation, fetc
   }
 
 
+  useEffect(() => {
+    const fetchUserAndLogin = async () => {
+      try {
+        // Check if user is already stored in localStorage
+        const storedUser = localStorage.getItem("chatUser");
+  
+        if (storedUser) {
+          console.log("User already logged in, skipping API call.");
+          setIsLogin(true);
+          return;
+        }
+  
+        // If no user is stored, proceed with fetching user data
+        const userResponse = await axios.get(
+          "https://localhost/bizencyProject/public/mis/get-user",
+          { withCredentials: true }
+        );
+  
+        if (userResponse.data) {
+          console.log(userResponse.data);
+          const role = userResponse.data.user.ishelpdesk === "1" ? "agent" : "customer";
+
+  
+          const loginData = {
+            username: userResponse.data.user.username || "Hajar",
+            role: role,
+            password: userResponse.data.password || "122345",
+          };
+  
+          try {
+            const loginResponse = await axios.post(
+              "https://localhost:1234/api/login",
+              loginData
+            );
+            console.log(loginResponse.data.user);
+  
+            if (loginResponse.data.success) {
+              localStorage.setItem("chatUser", JSON.stringify(loginResponse.data));
+  
+              const parsedUser = loginResponse.data.user;
+              socket.emit("login", parsedUser.fullName, parsedUser.role, parsedUser.userId, parsedUser._id);
+              setIsLogin(true);
+  
+              fetchAllConversationOfUser(parsedUser._id);
+            } else {
+              setLoginMessage(loginResponse.data.message);
+            }
+          } catch (loginError) {
+            console.error("Login error:", loginError);
+          }
+        } else {
+          console.warn("No user data received from Laravel API.");
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+  
+    fetchUserAndLogin();
+  }, []); // Run only once when the component mounts
+  
+
+
+
   //console.log(selectedAgent, LoggedInUser?.role,selectedUserConversation, 'from ChatArea');
   
 
@@ -302,7 +377,8 @@ function ChatArea({ onGetAgentDetail, selectedAgent, onGetUserConversation, fetc
         {!isLogin ? (
           <LoginForm getLoginUserData={setLoginUserdata} setLogin={setIsLogin} setUserName={setUserName} fetchAllConversationOfUser={fetchAllConversationOfUser} />
         ) : (
-          (Array.isArray(selectedUserConversation) && selectedUserConversation.length === 0 &&LoggedInUser?.role !== "agent") ||
+          //(Array.isArray(selectedUserConversation) && selectedUserConversation.length === 0 &&LoggedInUser?.role !== "agent") ||
+          (Array.isArray(selectedUserConversation) && selectedUserConversation.length === 0 ) ||
             (selectedUserConversation?.status === "open") ? (
             <MessageForm
               conversationId={ConversationId}

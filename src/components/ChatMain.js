@@ -29,21 +29,29 @@ function ChatMain() {
 
 
 
-  const fetchConversationDetails = async (customerId) => {
+  const fetchConversationDetails = async (customer) => {
     try {
-      const loggedInUser = localStorage.getItem('chatUser');
 
+      let customerId = customer._id;
+      
+      const loggedInUser = localStorage.getItem('chatUser');
+      
       //console.log(conversation, 'from chatMAIN');
       let agentId;
-
+      
       const { token, user } = JSON.parse(loggedInUser);
       const role = user.role;
       if (role === 'agent') {
+      
         agentId = user._id;
+        customerId = customer.id;
       } else if (role === 'customer') {
-        agentId = customerId;
+      
+        
+        agentId = customer.id;
         customerId = user._id;
       } else {
+      
         console.error("Invalid role:", role);
         return;
       }

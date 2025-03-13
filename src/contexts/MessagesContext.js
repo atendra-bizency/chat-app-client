@@ -37,7 +37,7 @@ export function useMessagesDispatch() {
 
 // Reducer function
 function messagesReducer(messages, action) {
-  //console.log(action, 'from messagesReducer');
+  console.log(action, 'from messagesReducer');
   
   switch (action.type) {
     case 'newmessage': {
