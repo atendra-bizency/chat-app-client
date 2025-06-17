@@ -19,6 +19,26 @@ function ChatArea({ onGetAgentDetail, selectedAgent, onGetUserConversation, fetc
   const [loginMessage, setLoginMessage] = useState(null);
   const [fullName, setFullName] = useState('');
   const [role, setRole] = useState('');
+
+  const BASE_URL = process.env.REACT_APP_API_BASE_URL;
+
+    const [mainUrl, setMainUrl] = useState(null);
+  
+    useEffect(() => {
+        // Get the query parameters from the URL
+        const queryParams = new URLSearchParams(window.location.search);
+  
+        // Get the 'mainUrl' parameter
+        const url = queryParams.get('mainUrl');
+  
+        //console.log(url);
+  
+        if (url) {
+            //console.log('Main Project URL:', url);
+            setMainUrl(url); // Store in state
+        }
+    }, [mainUrl]);
+    
   
   
 
@@ -88,7 +108,7 @@ function ChatArea({ onGetAgentDetail, selectedAgent, onGetUserConversation, fetc
       //console.log(user, 'LoggedInUser');
 
 
-      const response = await axios.get(`https://localhost:1234/api/conversation/${role}/${customerId}`);
+      const response = await axios.get(`${BASE_URL}/conversation/${role}/${customerId}`);
       //console.log('API Response:', response.data);
 
       if (response.data.success) {
@@ -312,12 +332,22 @@ function ChatArea({ onGetAgentDetail, selectedAgent, onGetUserConversation, fetc
           setIsLogin(true);
           return;
         }
+
+        let url = '';
+        const mainUrl = 'http://localhost/bizencyProject/public/printpace/dashboard';
+        const baseProjectUrl = mainUrl.split('/public')[0];
+        console.log(baseProjectUrl, 'baseProjectUrl'  );
+        
+       if (mainUrl.includes('/printpace/')) {
+          url = `${baseProjectUrl}/public/printpace/get-user`;
+        } else {
+          url = `${baseProjectUrl}/public/get-user`;
+        }
+
+        const userResponse = await axios.get(url, {
+          withCredentials: true,
+        });
   
-        // If no user is stored, proceed with fetching user data
-        const userResponse = await axios.get(
-          "https://localhost/bizencyProject/public/mis/get-user",
-          { withCredentials: true }
-        );
   
         if (userResponse.data) {
           console.log(userResponse.data);
@@ -332,7 +362,7 @@ function ChatArea({ onGetAgentDetail, selectedAgent, onGetUserConversation, fetc
   
           try {
             const loginResponse = await axios.post(
-              "https://localhost:1234/api/login",
+              `${BASE_URL}/login`,
               loginData
             );
             console.log(loginResponse.data.user);

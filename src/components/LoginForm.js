@@ -10,6 +10,8 @@ function LoginForm({ setLogin, setUserName , fetchAllConversationOfUser, getLogi
   //console.log(fetchConversationDetails);
 
   const [mainUrl, setMainUrl] = useState(null);
+  const BASE_URL = process.env.REACT_APP_API_BASE_URL;
+
 
   useEffect(() => {
       // Get the query parameters from the URL
@@ -30,8 +32,8 @@ function LoginForm({ setLogin, setUserName , fetchAllConversationOfUser, getLogi
 
     // Determine role based on URL
     const currentPath = window.location.pathname;
-    const role = mainUrl?.includes('/mis') ? 'agent' : 'customer';
-    //const role = currentPath?.includes('/') ? 'agent' : 'customer';
+    const role = mainUrl?.includes('/printpace') ? 'agent' : 'customer';
+    //const role = currentPath?.includes('/sss') ? 'agent' : 'customer';
 
     //console.log('Role:', role);
     
@@ -54,7 +56,7 @@ function LoginForm({ setLogin, setUserName , fetchAllConversationOfUser, getLogi
     }
 
     try {
-      const response = await axios.post('https://localhost:1234/api/login', loginData);
+      const response = await axios.post(`${BASE_URL}/login`, loginData);
       console.log(response.data);
       
 
@@ -100,7 +102,7 @@ function LoginForm({ setLogin, setUserName , fetchAllConversationOfUser, getLogi
 
           {/* Show password field only if role is "agent" */}
           {/* {window.location.pathname.includes('/') && ( */}
-          {mainUrl && mainUrl.includes('/mis') && (
+          {mainUrl && mainUrl.includes('/printpace') && (
             <div className="control">
               <input
                 value={userPassword}

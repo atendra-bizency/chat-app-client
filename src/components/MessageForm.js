@@ -9,6 +9,9 @@ function MessageForm({ fullName, LoggedInUser, selectedAgent, conversationId }) 
   const dispatch = useMessagesDispatch();
   const [respData, setRespData] = useState([]);
 
+  const BASE_URL = process.env.REACT_APP_API_BASE_URL;
+
+
   //console.log(conversationId, 'from message form');
 
 
@@ -52,8 +55,8 @@ function MessageForm({ fullName, LoggedInUser, selectedAgent, conversationId }) 
 
     // Determine API endpoint based on role
     const apiUrl = role === 'agent'
-      ? `https://localhost:1234/api/sendAgentMessage/`
-      : `https://localhost:1234/api/sendMessage/`;
+      ? `${BASE_URL}/sendAgentMessage/`
+      : `${BASE_URL}/sendMessage/`;
 
     // Define request payload
     const payload = {

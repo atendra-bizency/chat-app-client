@@ -12,6 +12,7 @@ function ChatMain() {
   const [userConversation, setUserConversation] = useState([]);
   const [teamDetails, setTeamDetails] = useState([]);
   const [conversation, setConversation] = useState([]);
+  const BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 
   const getAgentDetails = (agentDetails) => {
@@ -58,7 +59,7 @@ function ChatMain() {
 
       //console.log(customerId, 'customerId');
 
-      const response = await axios.post('https://localhost:1234/api/conversation', {
+      const response = await axios.post(`${BASE_URL}/conversation`, {
         customerId,
         agentId
       });
