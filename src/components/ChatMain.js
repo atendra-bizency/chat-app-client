@@ -1,7 +1,7 @@
 import React from 'react';
 import ChatArea from "./ChatArea";
 import ChatSidebar from "./ChatSidebar";
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
 
 
@@ -12,8 +12,50 @@ function ChatMain() {
   const [userConversation, setUserConversation] = useState([]);
   const [teamDetails, setTeamDetails] = useState([]);
   const [conversation, setConversation] = useState([]);
+  const [userStatuses, setUserStatuses] = useState({});
+
   const BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
+  const [sidebarWidth, setSidebarWidth] = useState(30); // in pixels
+  const resizerRef = useRef(null);
+  const isDragging = useRef(false);
+
+  const handleMouseDown = () => {
+    isDragging.current = true;
+    document.body.style.cursor = 'ew-resize'; // Apply globally on drag start
+  };
+
+const handleMouseMove = (e) => {
+  if (!isDragging.current) return;
+
+  const totalWidth = window.innerWidth;
+  const sidebarWidthPx = e.clientX;
+
+  // Convert px to %
+  const calculatedPercent = (sidebarWidthPx / totalWidth) * 100;
+
+  // Clamp between 27% and 50%
+  const clampedPercent = Math.min(Math.max(17, calculatedPercent), 50);
+
+  setSidebarWidth(clampedPercent);
+};
+
+
+
+  const handleMouseUp = () => {
+    isDragging.current = false;
+     document.body.style.cursor = ''; // Reset to default cursor
+  };
+
+  useEffect(() => {
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = ''; // Safety reset
+    };
+  }, []);
 
   const getAgentDetails = (agentDetails) => {
     // Ensure agentDetails is valid before setting state
@@ -98,9 +140,45 @@ function ChatMain() {
   //console.log(conversation, '=>>>>>conversationId');
 
   return (
-    <main className="columns">
-      <ChatArea fetchConversationDetails={fetchConversationDetails}  onGetAgentDetail={getAgentDetails} onGetUserConversation={getUserConversation} selectedAgent={selectedAgent} sendUserConversation={conversation} />
-      <ChatSidebar sendAgentDetails={agentDetails} callFromUserListConversation={fetchConversationDetails} sendUserConversation={userConversation} onAgentSelect={setSelectedAgent} />
+    <main className="columns" style={{ height: '94vh' }}>
+
+       <div style={{ width: `${sidebarWidth}%` }} className="bg-white border-l overflow-auto  has-background-light">
+      <ChatSidebar 
+        sendAgentDetails={agentDetails}
+        callFromUserListConversation={fetchConversationDetails}
+        userStatuses={userStatuses} 
+
+        sendUserConversation={userConversation}
+        onAgentSelect={setSelectedAgent} />
+        </div>
+         <div
+            ref={resizerRef}
+            onMouseDown={handleMouseDown}
+            className="cursor-ew-resize hover:bg-gray-500 transition-colors"
+            style={{
+              width: '2px',               // slightly wider for better grip
+              backgroundColor: 'rgb(194 194 194)',
+              zIndex: 10,
+              cursor: 'ew-resize'         // ensures horizontal resize cursor
+            }}
+          ></div>
+      <div style={{ width: `calc(100% - ${sidebarWidth}%)`,borderLeft: '1px solid #ccc' }} className="flex-grow overflow-auto bg-gray-100 ">
+      
+      <ChatArea 
+        fetchConversationDetails={fetchConversationDetails}
+        setUserStatuses={setUserStatuses}
+        onGetAgentDetail={getAgentDetails}
+        onGetUserConversation={getUserConversation}
+        selectedAgent={selectedAgent}
+        sendUserConversation={conversation} /></div>
+       
+      {/* <div style={{ width: `${sidebarWidth}%`, borderRight: '1px solid #ccc' }} className="bg-white border-l overflow-auto  has-background-light">
+      <ChatSidebar 
+        sendAgentDetails={agentDetails}
+        callFromUserListConversation={fetchConversationDetails}
+        sendUserConversation={userConversation}
+        onAgentSelect={setSelectedAgent} />
+        </div> */}
     </main>
   );
 }

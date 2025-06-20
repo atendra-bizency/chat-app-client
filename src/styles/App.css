@@ -1,3 +1,7 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap');
+
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -29,9 +33,13 @@ textarea {
   background-color: #ffffff; /* Set your background color */
   box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
 }
+
+.hero-body{
+  padding: 0 3rem !important;
+}
 .messagelist {
   padding: 0px 5px;
-  height: 400px;
+  height: 76vh;
   overflow-y: scroll;
 }
 
@@ -42,10 +50,11 @@ textarea {
 .text {
   border-radius: 5px;
   padding: 5px;
-  width: 300px;
+  width: 40%;
   margin-bottom: 5px;
   word-break: break-all;
   white-space: pre-line;
+  font-family: 'roboto';
 }
 
 .secondary .text{
@@ -54,7 +63,7 @@ textarea {
 }
 .primary .text 
  {
-  background-color: #A5F1B3;
+  background-color: #c9f6d1;
   border: 1px solid #A5F1B3;
 }
 
@@ -87,7 +96,8 @@ aside {
 
 
 #activeUsersList {
-  max-height: 400px; /* Set a fixed height for the container */
+  max-height: 94vh; /* Set a fixed height for the container */
+  min-height: 94vh; /* Set a fixed height for the container */
   overflow-y: auto; /* Enable vertical scrolling */
 }
 
@@ -113,4 +123,20 @@ aside {
 
   background-color: #f0f8ff;
   border: 1px solid #4a9de6;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 8px;
+}
+
+.status-dot.online {
+  background-color: #22c55e; /* Tailwind green-500 */
+}
+
+.status-dot.offline {
+  background-color: #fff000fa; /* Tailwind gray-400 */
 }

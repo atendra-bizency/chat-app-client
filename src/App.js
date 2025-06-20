@@ -8,17 +8,17 @@ import './styles/App.css';
 function App() {
   return (
     <MessagesProvider>
-      <div className="hero is-fullheight has-text-white is-unselectable is-size-6">
-        <div className="hero-body">
-          <div className="container">
+      <div className="hero is-unselectable has-text-white  is-size-6"  style={{padding:'1rem 0rem 0rem 1rem'}}>
+        {/* <div className="" > */}
+          {/* <div className="container"> */}
 
             <ChatHeader title="BizChat" />
             <ChatMain />
-            <ChatFooter />
+            {/* <ChatFooter /> */}
 
-          </div>
+          {/* </div> */}
         </div>
-      </div>
+      {/* </div> */}
     </MessagesProvider>
   );
 }

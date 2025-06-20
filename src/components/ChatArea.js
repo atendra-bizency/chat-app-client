@@ -6,7 +6,7 @@ import MessageForm from './MessageForm';
 import MessageList from './MessageList';
 import axios from 'axios';
 
-function ChatArea({ onGetAgentDetail, selectedAgent, onGetUserConversation, fetchConversationDetails, sendUserConversation }) {
+function ChatArea({ onGetAgentDetail, selectedAgent, onGetUserConversation, fetchConversationDetails, sendUserConversation , setUserStatuses}) {
   const [isLogin, setIsLogin] = useState(false);
   const [userName, setUserName] = useState('');
   const [LoggedInUser, setLoggedInUser] = useState(null);
@@ -200,6 +200,33 @@ function ChatArea({ onGetAgentDetail, selectedAgent, onGetUserConversation, fetc
     };
   }, [dispatch]);
 
+  useEffect(() => {
+  /*socket.on('user-status-update', ({ objectId, is_active  }) => {
+
+    console.log(objectId, is_active    );
+    
+    setUserStatuses(prev => ({
+      ...prev,
+      [objectId]: is_active 
+    })); 
+  }); */
+
+  socket.on('user-status-update', (statuses) => {
+  statuses.forEach(({ userId, is_active }) => {
+    setUserStatuses(prev => ({
+      ...prev,
+      [userId]: is_active
+    }));
+  });
+});
+
+
+  return () => {
+    socket.off('user-status-update');
+  };
+}, []);
+
+
   // Combine messages from API and real-time context
   const getCombinedMessages = () => {
 
@@ -334,16 +361,19 @@ function ChatArea({ onGetAgentDetail, selectedAgent, onGetUserConversation, fetc
         }
 
         let url = '';
-        const mainUrl = 'http://localhost/bizencyProject/public/printpace/dashboard';
-        const baseProjectUrl = mainUrl.split('/public')[0];
-        console.log(baseProjectUrl, 'baseProjectUrl'  );
+        //const mainUrl = 'http://localhost/bizencyProject/public/printpace/dashboard';
+        let baseProjectUrl;
+        if (mainUrl.includes('/public')) {
+          baseProjectUrl = mainUrl.split('/public')[0]; // Extract before /public
+        } else {
+          baseProjectUrl = mainUrl; // Use full URL as-is
+        }
         
-       if (mainUrl.includes('/printpace/')) {
+        if (mainUrl.includes('/printpace/')) {
           url = `${baseProjectUrl}/public/printpace/get-user`;
         } else {
           url = `${baseProjectUrl}/public/get-user`;
         }
-
         const userResponse = await axios.get(url, {
           withCredentials: true,
         });
@@ -403,7 +433,7 @@ function ChatArea({ onGetAgentDetail, selectedAgent, onGetUserConversation, fetc
   return (
     <section className="column">
       <MessageList messages={getCombinedMessages()} />
-      <div className="columns is-mobile has-background-white is-paddingless has-text-centered messageform">
+      <div className="columns is-mobile has-background-white is-paddingless has-text-centered messageform" style={{height: '18vh'}}>
         {!isLogin ? (
           <LoginForm getLoginUserData={setLoginUserdata} setLogin={setIsLogin} setUserName={setUserName} fetchAllConversationOfUser={fetchAllConversationOfUser} />
         ) : (

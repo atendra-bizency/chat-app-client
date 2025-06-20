@@ -1,5 +1,7 @@
 import SocketIO from 'socket.io-client';
-const SOCKET_URL = 'http://192.168.1.3:1234/';
+const BASE_URL = process.env.REACT_APP_API_SOCKET_URL;
+
+const SOCKET_URL = BASE_URL;
 
 let socket = SocketIO(SOCKET_URL, {
     transports: ['websocket'],

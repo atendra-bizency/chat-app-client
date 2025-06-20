@@ -4,7 +4,7 @@ import axios from 'axios';  // Make sure to import Axios
 import socket from '../Socket';
 
 
-function UserList({ sendAgentDetails, onAgentSelect , sendUserConversation, callFromUserListConversation }) {
+function UserList({ sendAgentDetails, onAgentSelect , sendUserConversation, callFromUserListConversation , userStatuses}) {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);  // Track loading state
   const [selectedUserId, setSelectedUserId] = useState(null); // Track selected user
@@ -141,8 +141,8 @@ function UserList({ sendAgentDetails, onAgentSelect , sendUserConversation, call
 
   return (
     <div id="activeUsersList">
-      <h2 className="has-text-centered is-size-6 is-marginless is-paddingless">
-        Online 
+      <h2 className="has-text-left ml-4 is-size-6 is-marginless is-paddingless">
+        Chats 
       </h2>
 
       {loading ? (
@@ -159,6 +159,9 @@ function UserList({ sendAgentDetails, onAgentSelect , sendUserConversation, call
         <div className={`user-card ${selectedUserId === user.id ? 'highlighted' : ''}`}>
           <i className="fa fa-user" aria-hidden="true"></i>&nbsp;
           <p className="user-name">{user.fullName}</p>
+           {/* <span className={`w-2 h-2 rounded-full ${userStatuses[user.id] ? 'bg-green-500' : 'bg-gray-400'}`}></span> */}
+           <span className={`status-dot ${userStatuses[user.id] ? 'online' : 'offline'}`}></span>
+
         </div>
       </li>
     ))
@@ -179,9 +182,11 @@ function UserList({ sendAgentDetails, onAgentSelect , sendUserConversation, call
     </button>
     
   ) : (
-    <button className="button is-danger mt-2" onClick={handleCloseChat}>
+    <div style={{textAlign: 'right', marginRight: '10px'}}>
+    {/* <button className="button is-danger mt-2" onClick={handleCloseChat}>
       Close Chat
-    </button>
+    </button> */}
+      </div>
   )
 )}
 
