@@ -15,6 +15,7 @@ function ChatArea({ onGetAgentDetail, selectedAgent, onGetUserConversation, fetc
   const [teamDetails, setTeamDetails] = useState([]);
   const [ConversationId, setConversationId] = useState('');
   const [selectedUserConversation, setSelectedUserConversation] = useState([]);
+  const [selectedUserConversationStatus, setSelectedUserConversationStatus] = useState(true);
 
   const [loginMessage, setLoginMessage] = useState(null);
   const [fullName, setFullName] = useState('');
@@ -37,7 +38,7 @@ function ChatArea({ onGetAgentDetail, selectedAgent, onGetUserConversation, fetc
             //console.log('Main Project URL:', url);
             setMainUrl(url); // Store in state
         }
-    }, [mainUrl]);
+    }, []);
     
   
   
@@ -82,7 +83,7 @@ function ChatArea({ onGetAgentDetail, selectedAgent, onGetUserConversation, fetc
     const loggedInUser = localStorage.getItem('chatUser');
     if (loggedInUser) {
       const { token, user } = JSON.parse(loggedInUser);
-      console.log(user);
+      //console.log(user);
       
       socket.emit('restore session', token);
       setIsLogin(true);
@@ -201,24 +202,19 @@ function ChatArea({ onGetAgentDetail, selectedAgent, onGetUserConversation, fetc
   }, [dispatch]);
 
   useEffect(() => {
-  /*socket.on('user-status-update', ({ objectId, is_active  }) => {
-
-    console.log(objectId, is_active    );
-    
-    setUserStatuses(prev => ({
-      ...prev,
-      [objectId]: is_active 
-    })); 
-  }); */
-
-  socket.on('user-status-update', (statuses) => {
-  statuses.forEach(({ userId, is_active }) => {
-    setUserStatuses(prev => ({
-      ...prev,
-      [userId]: is_active
-    }));
-  });
+socket.on('user-status-update', (statuses) => {
+  if (Array.isArray(statuses)) {
+    statuses.forEach(({ userId, is_active }) => {
+      setUserStatuses((prev) => ({
+        ...prev,
+        [userId]: is_active,
+      }));
+    });
+  } else {
+    console.warn('Expected an array of statuses, got:', statuses);
+  }
 });
+
 
 
   return () => {
@@ -230,17 +226,17 @@ function ChatArea({ onGetAgentDetail, selectedAgent, onGetUserConversation, fetc
   // Combine messages from API and real-time context
   const getCombinedMessages = () => {
 
-    console.log('check enter or not');
-    console.log(conversation, 'conversation');
+    //console.log('check enter or not');
+    //console.log(conversation, 'conversation');
     const isConversationAvailableOrNot = conversation.find(
       conv => conv.conversation_id === messages.conversationId
     );
 
 
-    console.log(messages);
+    //console.log(messages);
      // If no conversation exists, return only real-time messages
   if (!isConversationAvailableOrNot && !messages) {
-    console.log('New conversation detected. Showing real-time messages only.');
+    //console.log('New conversation detected. Showing real-time messages only.');
     return messages.filter(msg => 
       msg.receiver === selectedAgent?.userId || 
       msg.senderId === selectedAgent?.userId
@@ -252,7 +248,7 @@ function ChatArea({ onGetAgentDetail, selectedAgent, onGetUserConversation, fetc
     
     if (!selectedAgent) return [];
 
-    console.log(selectedAgent, 'selectedAgent');
+    //console.log(selectedAgent, 'selectedAgent');
 
     // Find conversation for selected agent
     const agentConversation = conversation.find(
@@ -264,7 +260,7 @@ function ChatArea({ onGetAgentDetail, selectedAgent, onGetUserConversation, fetc
       return messages
       
     }
-    console.log(agentConversation, 'agentConversation');
+    //console.log(agentConversation, 'agentConversation');
 
     // Get messages from both sources
     const apiMessages = agentConversation?.messages || [];
@@ -286,18 +282,18 @@ function ChatArea({ onGetAgentDetail, selectedAgent, onGetUserConversation, fetc
         type: 'information',
       };
 
-      console.log(closedMessage, 'from closedMessage');
+      //console.log(closedMessage, 'from closedMessage');
       
 
       apiMessages.push(closedMessage);  // Append the closed message ONLY if it's not already there
     }
 
-    console.log(apiMessages, 'apiMessages');
+    //console.log(apiMessages, 'apiMessages');
 
     const realTimeMessages = messages.filter(
       (msg) => {
 
-        console.log(msg);
+        //console.log(msg);
         if (selectedAgent) {
 
           return msg.receiver === selectedAgent.id || msg.senderId === selectedAgent.id;
@@ -318,7 +314,8 @@ function ChatArea({ onGetAgentDetail, selectedAgent, onGetUserConversation, fetc
 
     const handleChatClose = ({ conversationId, senderId, receiverId, message }) => {
       console.log(`Chat closed by ${senderId}: ${message}`);  // <-- Debug log
-
+      setSelectedUserConversationStatus(false) ;   
+      
       // Dispatch new message after closing chat (if needed)
       dispatch({
         type: 'newmessage',
@@ -349,30 +346,37 @@ function ChatArea({ onGetAgentDetail, selectedAgent, onGetUserConversation, fetc
 
 
   useEffect(() => {
+     //if (!mainUrl) return; // Don't proceed if mainUrl isn't ready
     const fetchUserAndLogin = async () => {
       try {
         // Check if user is already stored in localStorage
         const storedUser = localStorage.getItem("chatUser");
   
         if (storedUser) {
-          console.log("User already logged in, skipping API call.");
+          //console.log("User already logged in, skipping API call.");
           setIsLogin(true);
           return;
         }
-
+        //console.log(mainUrl, 'mainUrl');
+        
         let url = '';
-        //const mainUrl = 'http://localhost/bizencyProject/public/printpace/dashboard';
+        const mainUrl = 'https://zeejprint.com/printpace/dashboard';
+        console.log(mainUrl, 'mainUrl'  );
+        
         let baseProjectUrl;
-        if (mainUrl.includes('/public')) {
-          baseProjectUrl = mainUrl.split('/public')[0]; // Extract before /public
+        if (mainUrl.includes('/printpace')) {
+          baseProjectUrl = mainUrl.split('/printpace')[0]; // Extract before /public
         } else {
-          baseProjectUrl = mainUrl; // Use full URL as-is
+          baseProjectUrl = mainUrl.split('/en-SA')[0]; // Use full URL as-is
         }
+        console.log(baseProjectUrl, 'baseProjectUrl'  );
+        
+
         
         if (mainUrl.includes('/printpace/')) {
-          url = `${baseProjectUrl}/public/printpace/get-user`;
+          url = `${baseProjectUrl}/printpace/get-user`;
         } else {
-          url = `${baseProjectUrl}/public/get-user`;
+          url = `${baseProjectUrl}/get-user`;
         }
         const userResponse = await axios.get(url, {
           withCredentials: true,
@@ -380,7 +384,7 @@ function ChatArea({ onGetAgentDetail, selectedAgent, onGetUserConversation, fetc
   
   
         if (userResponse.data) {
-          console.log(userResponse.data);
+          //console.log(userResponse.data);
           const role = userResponse.data.user.ishelpdesk === "1" ? "agent" : "customer";
 
   
@@ -395,7 +399,7 @@ function ChatArea({ onGetAgentDetail, selectedAgent, onGetUserConversation, fetc
               `${BASE_URL}/login`,
               loginData
             );
-            console.log(loginResponse.data.user);
+            //console.log(loginResponse.data.user);
   
             if (loginResponse.data.success) {
               localStorage.setItem("chatUser", JSON.stringify(loginResponse.data));
@@ -446,6 +450,7 @@ function ChatArea({ onGetAgentDetail, selectedAgent, onGetUserConversation, fetc
               fullName={userName}
               LoggedInUser={LoggedInUser}
               fetchConversationDetails={fetchConversationDetails}
+              disabled={selectedUserConversationStatus === false}
             />
           ) : null
         )}

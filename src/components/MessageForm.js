@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useMessagesDispatch } from '../contexts/MessagesContext';
 import socket from '../Socket';
 
-function MessageForm({ fullName, LoggedInUser, selectedAgent, conversationId }) {
+function MessageForm({ disabled,fullName, LoggedInUser, selectedAgent, conversationId }) {
   const textareaRef = useRef(null);
   const emojiRef = useRef(null);
   const dispatch = useMessagesDispatch();
@@ -184,19 +184,19 @@ function MessageForm({ fullName, LoggedInUser, selectedAgent, conversationId }) 
   return (
     <>
       <div className="column is-paddingless">
-        <textarea ref={textareaRef} autoFocus={true} className="textarea is-shadowless" rows="2" placeholder="Type a message" onKeyDown={checkSubmit}></textarea>
+        <textarea ref={textareaRef} autoFocus={true} className="textarea is-shadowless" rows="2" placeholder="Type a message" onKeyDown={checkSubmit} disabled={disabled}></textarea>
       </div>
 
       <div className="column is-2-mobile is-1-tablet is-paddingless">
 
         <div className="emoji-wrapper">
-          <button className="button is-medium is-paddingless is-white" id="Emoji">
+          <button className="button is-medium is-paddingless is-white" id="Emoji" disabled={disabled}>
             <i className="far fa-smile"></i>
           </button>
           <div ref={emojiRef} id="EmojiList" className="popover has-background-white"></div>
         </div>
 
-        <button className="button is-medium is-paddingless is-white" onClick={handleSubmit}><i className="far fa-paper-plane"></i></button>
+        <button className="button is-medium is-paddingless is-white" onClick={handleSubmit} disabled={disabled}><i className="far fa-paper-plane"></i></button>
       </div>
     </>
   );

@@ -107,11 +107,7 @@ const handleMouseMove = (e) => {
       });
 
 
-      //const response = await axios.get(`https://localhost:1234/api/conversation/${role}/${customerId}`);
-      //console.log('API Response:', response.data);
-
-      //console.log(response);
-
+ 
 
       if (response.data.message) {
         const conversations = response.data.data;

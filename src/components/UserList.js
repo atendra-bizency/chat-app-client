@@ -8,9 +8,15 @@ function UserList({ sendAgentDetails, onAgentSelect , sendUserConversation, call
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);  // Track loading state
   const [selectedUserId, setSelectedUserId] = useState(null); // Track selected user
+  const [chatStatus, setchatStatus] = useState(true); // Track selected user
   const [SelectedUserDeatils, setSelectedUserDeatils] = useState([]);
+  const [loggedInUser, setLoggedInUser] = useState(null);
   const dispatch = useMessagesDispatch();
   const messages = useMessages();
+  
+
+  const BASE_URL = process.env.REACT_APP_API_BASE_URL;
+
 
   //console.log(sendUserConversation,'from 00000');
   //console.log(sendUserConversation?.length,'from 00000');
@@ -51,7 +57,7 @@ function UserList({ sendAgentDetails, onAgentSelect , sendUserConversation, call
     
     if (Array.isArray(sendAgentDetails) && sendAgentDetails.length > 0) {
       // Extract relevant agent details and setUsers
-      console.log('sendAgentDetails:', sendAgentDetails);
+      //console.log('sendAgentDetails:', sendAgentDetails);
       const formattedUsers = sendAgentDetails.map(agent => ({
         id: agent._id,
         fullName: agent.username,
@@ -61,6 +67,7 @@ function UserList({ sendAgentDetails, onAgentSelect , sendUserConversation, call
         userId: agent.userId,
         role:agent.role
       }));
+      
   
       setUsers(formattedUsers);
     } else {
@@ -74,7 +81,7 @@ function UserList({ sendAgentDetails, onAgentSelect , sendUserConversation, call
 
 
    const handleSelectUser = (user) => {
-    console.log(user, 'from handleSelectUser');
+    //console.log(user, 'from handleSelectUser');
     
     callFromUserListConversation(user)
     
@@ -82,14 +89,24 @@ function UserList({ sendAgentDetails, onAgentSelect , sendUserConversation, call
     onAgentSelect(user);  // Notify parent component
   };
 
-  const loggedInUser = localStorage.getItem('chatUser');
-  //const { storedUser } = JSON.parse(loggedInUser);
+useEffect(() => {
+  const stored = localStorage.getItem('chatUser');
+  if (stored) {
+    const { token, user } = JSON.parse(stored);
+    setLoggedInUser(user);
+  }
+}, []);
+
+//console.log(loggedInUser, 'loggedInUser');
+
+  //console.log(storedUser, 'from userList'  );
+  
 
   const handleCloseChat = () => {
     //console.log(sendConversationId);  // Log the conversation ID
   
     // Send GET request to the API to close the chat and retrieve messages
-    axios.get(`https://localhost:1234/api/getMessage/${sendUserConversation.conversation_id}`)
+    axios.get(`${BASE_URL}/getMessage/${sendUserConversation.conversation_id}`)
       .then(response => {
         // Handle the response data here
         const { customerId, message, agentId } = response.data;
@@ -113,7 +130,7 @@ function UserList({ sendAgentDetails, onAgentSelect , sendUserConversation, call
 
         // Send a socket event to notify both sender and receiver
       socket.emit('close chat', socketPayload);
-  
+         console.log(`Chat closed by ${agentId}: ${message}`);
         // Dispatch new message after closing chat (if needed)
         dispatch({
           type: 'newmessage',
@@ -125,9 +142,11 @@ function UserList({ sendAgentDetails, onAgentSelect , sendUserConversation, call
             receiver:customerId,
           },
         });
+
+        setchatStatus(false);
   
         // Remove only the selected user from the users list
-        setUsers(users.filter(user => user.id !== selectedUserId)); // Remove selected user
+        //setUsers(users.filter(user => user.id !== selectedUserId)); // Remove selected user
   
         // Optionally, reset selected user if needed
         // setSelectedUserId(null); // Reset selected user
@@ -175,20 +194,21 @@ function UserList({ sendAgentDetails, onAgentSelect , sendUserConversation, call
       )}
 
       {/* Show Close Chat button only if selected user is an agent and conversation is not closed */}
-      {selectedUserId && users.find(user => user.id === selectedUserId) && (
-  sendUserConversation?.status === "closed" ? (
-    <button className="button is-warning mt-2" >
-      Reopen Chat
-    </button>
-    
-  ) : (
-    <div style={{textAlign: 'right', marginRight: '10px'}}>
-    {/* <button className="button is-danger mt-2" onClick={handleCloseChat}>
-      Close Chat
-    </button> */}
-      </div>
-  )
-)}
+     {loggedInUser?.role === "agent" &&
+      selectedUserId &&
+      users.find((user) => user.id === selectedUserId) && (
+        sendUserConversation?.status === "closed" ? (
+          <button className="button is-warning mt-2" >
+            Reopen Chat
+          </button>
+        ) : (
+          <div style={{ textAlign: "right", marginRight: "10px" }}>
+            <button className="button is-danger mt-2" onClick={handleCloseChat} disabled={chatStatus==false}>
+              Close Chat
+            </button>
+          </div>
+        )
+      )}
 
 
     </div>
